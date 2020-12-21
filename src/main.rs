@@ -7,18 +7,18 @@ struct Signature {
 
 impl Signature {
 	fn new(sig: &str) -> Self {
-		let mut data = Vec::new();
-		let len = sig.split(' ').count();
+		let iter = sig.split(' ');
 
-		for (i, sub) in sig.split(' ').enumerate() {
-			if sub == "??" {
-				continue;
-			}
+		let len = iter.clone().count();
+		let data = iter
+			.enumerate()
+			.filter(|v| v.1 != "??")
+			.map(|(i, sub)| {
+				let v = u8::from_str_radix(sub, 16).unwrap();
 
-			let v = u8::from_str_radix(sub, 16).unwrap();
-
-			data.push((i, v));
-		}
+				(i, v)
+			})
+			.collect();
 
 		Self { data, len }
 	}
