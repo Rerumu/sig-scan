@@ -38,13 +38,7 @@ impl Signature {
 }
 
 fn sig_scan_data(data: &[u8], sig: &Signature) -> Option<usize> {
-	for (i, w) in data.windows(sig.len).enumerate() {
-		if sig.compare(w) {
-			return Some(i);
-		}
-	}
-
-	None
+	data.windows(sig.len).position(|w| sig.compare(w))
 }
 
 fn print_usage() {
