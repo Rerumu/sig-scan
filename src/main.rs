@@ -7,7 +7,7 @@ struct Signature {
 
 impl Signature {
 	fn new(sig: &str) -> Self {
-		let iter = sig.split(' ');
+		let iter = sig.split_whitespace();
 
 		let len = iter.clone().count();
 		let data = iter
