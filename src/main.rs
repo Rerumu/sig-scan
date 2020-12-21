@@ -1,44 +1,36 @@
 use std::fs;
 
 struct Signature {
-	data: Vec<(usize, u8)>,
-	len: usize,
+	data: Vec<Option<u8>>,
+}
+
+fn to_mask(b: &str) -> Option<u8> {
+	if b != "??" {
+		let v = u8::from_str_radix(b, 16).unwrap();
+
+		Some(v)
+	} else {
+		None
+	}
 }
 
 impl Signature {
 	fn new(sig: &str) -> Self {
-		let iter = sig.split_whitespace();
+		let data = sig.split_whitespace().map(to_mask).collect();
 
-		let len = iter.clone().count();
-		let data = iter
-			.enumerate()
-			.filter(|v| v.1 != "??")
-			.map(|(i, sub)| {
-				let v = u8::from_str_radix(sub, 16).unwrap();
-
-				(i, v)
-			})
-			.collect();
-
-		Self { data, len }
+		Self { data }
 	}
 
 	fn compare(&self, data: &[u8]) -> bool {
-		// avoid bounds checking
-		assert!(self.len <= data.len());
-
-		for (i, v) in self.data.iter() {
-			if unsafe { data.get_unchecked(*i) } != v {
-				return false;
-			}
-		}
-
-		true
+		self.data
+			.iter()
+			.zip(data)
+			.all(|(m, v)| m.map_or(true, |w| v == &w))
 	}
 }
 
 fn sig_scan_data(data: &[u8], sig: &Signature) -> Option<usize> {
-	data.windows(sig.len).position(|w| sig.compare(w))
+	data.windows(sig.data.len()).position(|w| sig.compare(w))
 }
 
 fn print_usage() {
